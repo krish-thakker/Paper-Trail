@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 conn = psycopg2.connect(
-    host=os.environ['DB_HOST'],
+    host='localhost',
     database=os.environ['DB_NAME'],
     user=os.environ['DB_USER'],
     password=os.environ['DB_PASSWORD']
@@ -23,7 +23,6 @@ cur.execute('''
         ('April', 1700.00, 1400.00, 3300.00, 275.00, 180.00),
         ('May', 1650.00, 1250.00, 3150.00, 230.00, 170.00);
 ''')
-
 
 conn.commit()
 cur.close()
