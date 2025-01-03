@@ -81,6 +81,8 @@ To run this project locally, follow the steps below:
 
      ```bash
      npm install
+     npm install react@18.0.0 react-dom@18.0.0
+     npm install chart.js@3.9.1 react-chartjs-2
      ```
 
 4. **Run the Backend**:
