@@ -16,7 +16,7 @@ print("DB User:", os.getenv('DB_USER'))  # This should print 'postgres'
 print("DB Password:", os.getenv('DB_PASSWORD'))  # This should print the password
 
 app = Flask(__name__)
-CORS(app)  # Enable Cross-Origin Resource Sharing (CORS) for the frontend to access the API
+CORS(app, origins="http://localhost:3000")  # Enable Cross-Origin Resource Sharing (CORS) for the frontend to access the API
 
 def get_db_connection():
     conn = psycopg2.connect(
@@ -46,7 +46,8 @@ def get_records():
     # Format finances as a list of dictionaries for easier JSON conversion
     finances_list = [
         {'id': finance[0], 'month': finance[1], 'checking_balance': finance[2], 'stock_balance': finance[3],
-         'income': finance[4], 'credit_bill': finance[5], 'other_expenses': finance[6], 'net_worth': finance[7], 'money_added': finance[8]}
+         'income': finance[4], 'credit_bill': finance[5], 'other_expenses': finance[6], 'net_worth': finance[7], 
+         'money_added': finance[8], 'stock_growth': finance[9]}
         for finance in finances
     ]
     return jsonify(finances_list)
@@ -62,6 +63,7 @@ def create_record():
     credit_bill = data.get('credit_bill')
     other_expenses = data.get('other_expenses')
     money_added = data.get('money_added')
+    stock_growth = data.get('stock_growth')
     net_worth = checking_balance + stock_balance # Sets net worth
 
     conn = get_db_connection()
@@ -81,15 +83,16 @@ def create_record():
                 credit_bill = %s,
                 other_expenses = %s,
                 net_worth = %s,
-                money_added = %s
+                money_added = %s,
+                stock_growth = %s
             WHERE month = %s
-        ''', (checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, month))
+        ''', (checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, stock_growth, month))
     else:
         # Insert a new record
         cur.execute('''
-            INSERT INTO finances (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        ''', (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added))
+            INSERT INTO finances (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, stock_growth)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ''', (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, stock_growth))
 
     conn.commit()
     cur.close()

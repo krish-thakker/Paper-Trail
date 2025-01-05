@@ -144,16 +144,16 @@ function App() {
       <h2 style={headingStyle}>Add a New Finance Record</h2>
       <form onSubmit={handleSubmit} style={formStyle}>
         <div style={formGridStyle}>
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Month:</label>
-            <input
-              type="text"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              required
-              style={inputStyle}
-            />
-          </div>
+        <div style={formGroupStyle}>
+          <label style={labelStyle}>Month:</label>
+          <input
+            type="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            required
+            style={inputStyle}
+          />
+        </div>
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Checking Balance:</label>
@@ -178,7 +178,7 @@ function App() {
           </div>
 
           <div style={formGroupStyle}>
-            <label style={labelStyle}>Money Added:</label>
+            <label style={labelStyle}>Money Added To Stock:</label>
             <input
               type="number"
               value={moneyAdded}

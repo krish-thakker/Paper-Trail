@@ -13,16 +13,18 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# Create the books table
+# Create the finances table
 cur.execute('''
     CREATE TABLE finances (
         id serial PRIMARY KEY,
-        month varchar(20) NOT NULL,
+        month DATE NOT NULL,
         checking_balance numeric(10, 2) NOT NULL,
         stock_balance numeric(10, 2) NOT NULL,
         income numeric(10, 2) NOT NULL,
         credit_bill numeric(10, 2) NOT NULL,
-        other_expenses numeric(10,2) NOT NULL
+        other_expenses numeric(10,2) NOT NULL,
+        net_worth numeric(10, 2),
+        money_added numeric(10, 2)
     );
 ''')
 
