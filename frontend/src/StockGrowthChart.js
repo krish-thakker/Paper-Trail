@@ -44,26 +44,10 @@ const App = () => {
     labels: financeData.map(item => formatMonth(item.month)),
     datasets: [
       {
-        label: 'Checking Balance',
-        data: financeData.map(item => item.checking_balance),
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.4,
-        fill: false,
-      },
-      {
-        label: 'Stock Balance',
-        data: financeData.map(item => item.stock_balance),
-        borderColor: 'rgba(153, 102, 255, 1)',
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        tension: 0.4,
-        fill: false,
-      },
-      {
-        label: 'Net Worth',
-        data: financeData.map(item => item.net_worth),
-        borderColor: 'rgba(255, 159, 64, 1)',
-        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+        label: 'Stock Growth',
+        data: financeData.map(item => item.stock_growth),
+        borderColor: 'rgb(71, 131, 235)',
+        backgroundColor: 'rgba(93, 158, 250, 0.2)',
         tension: 0.4,
         fill: false,
       },
@@ -124,7 +108,7 @@ const App = () => {
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
       margin: '20px',
     }}>
-      {/* <h1 style={{ marginBottom: '20px' }}>Net Worth Over Time</h1> */}
+      {/* <h1 style={{ marginBottom: '20px' }}>Stock Growth Over Time</h1> */}
       <div style={{ height: '500px' }}>
         <Line data={chartData} options={options} />
       </div>

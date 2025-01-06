@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import FinanceChart from './FinanceChart';
+import StockGrowthChart from './StockGrowthChart';
 
 function App() {
   const [finances, setFinances] = useState([]);
@@ -139,6 +140,12 @@ function App() {
     fontSize: '20px',
   };
 
+  const formatMonth = (dateString) => {
+    const date = new Date(dateString);
+    date.setMonth(date.getMonth() + 1);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
   return (
     <div style={containerStyle}>
       <h2 style={headingStyle}>Add a New Finance Record</h2>
@@ -254,7 +261,7 @@ function App() {
           <tbody>
             {finances.map((finance, index) => (
               <tr key={index}>
-                <td style={tdStyle}>{finance.month}</td>
+                <td style={tdStyle}>{formatMonth(item.month)}</td>
                 <td style={tdStyle}>{finance.checking_balance}</td>
                 <td style={tdStyle}>{finance.stock_balance}</td>
                 <td style={tdStyle}>{finance.money_added}</td>
@@ -269,7 +276,13 @@ function App() {
       </div>
 
       <div style={{ marginTop: '30px' }}>
+        <h1 style={headingStyle}>Net Worth Chart</h1>
         <FinanceChart />
+      </div>
+
+      <div style={{ marginTop: '30px' }}>
+        <h1 style={headingStyle}>Stock Growth Chart</h1>
+        <StockGrowthChart />
       </div>
     </div>
   );

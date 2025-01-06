@@ -106,7 +106,8 @@ def generate_chart():
     df = get_finance_data()
 
     # Convert 'month' column to datetime format
-    df['month'] = pd.to_datetime(df['month'], format='%B')
+    df['month'] = pd.to_datetime(df['month'], format='%B %Y')
+    print(df['month'])
 
     # Create the plot for checking_balance over time
     plt.figure(figsize=(10, 6))
