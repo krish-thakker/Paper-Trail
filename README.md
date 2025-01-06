@@ -6,7 +6,8 @@
 3. [Technologies](#technologies)
 4. [Installation](#installation)
 5. [Endpoints](#endpoints)
-6. [Contact](#contact)
+6. [Screenshots](#screenshots)
+7. [Contact](#contact)
 
 ## Introduction
 
@@ -126,6 +127,10 @@ To run this project locally, follow the steps below:
   "other_expenses": 400.00
 }
 ```
+
+## Screenshots
+<img src="screenshots/add-record.png" alt="Alt Text" width="500">
+<img src="screenshots/net-worth.png" alt="Alt Text" width="350">
 
 ## Contact
 
