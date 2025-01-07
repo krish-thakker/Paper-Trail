@@ -1,5 +1,5 @@
 {
-  "name": "finance-tracker-frontend",
+  "name": "paper-trail",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,6 +9,7 @@
     "react": "^18.0.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.0.0",
+    "react-router": "^6.21.1",
     "react-scripts": "^3.0.1",
     "web-vitals": "^4.2.4"
   },

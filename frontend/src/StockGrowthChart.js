@@ -35,9 +35,13 @@ const App = () => {
   }, []);
 
   const formatMonth = (dateString) => {
-    const date = new Date(dateString);
-    date.setMonth(date.getMonth() + 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const date = new Date(dateString); // Create date from the input string
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      timeZone: 'UTC', // Ensure it's in UTC
+    });
+    return formatter.format(date);
   };
 
   const chartData = {

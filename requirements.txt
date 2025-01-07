@@ -1,6 +1,9 @@
-Flask
-psycopg2-binary
-python-dotenv
-flask_cors
-matplotlib
-pandas
+Flask==3.1.0
+Flask-Cors==5.0.0
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
+pandas==2.2.3
+matplotlib==3.10.0
+numpy==2.2.1
+python-dateutil==2.9.0.post0
+pytz==2024.2

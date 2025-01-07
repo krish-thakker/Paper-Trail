@@ -128,5 +128,37 @@ def generate_chart():
     # Send the image back to the client
     return send_file(img, mimetype='image/png')
 
+def calculate_average_growth(df):
+    # Calculate the average stock growth
+    avg_growth_rate = df['stock_growth'].mean()
+    print(f"Average Monthly Stock Growth: {avg_growth_rate:.2f}%")
+    return avg_growth_rate / 100  # Convert percentage to multiplier
+
+@app.route('/api/projected_growth', methods=['GET'])
+def projected_growth():
+    # Get the finance data
+    df = get_finance_data()
+
+    # Ensure 'stock_growth' column exists and contains numeric values
+    if 'stock_growth' not in df.columns or not pd.api.types.is_numeric_dtype(df['stock_growth']):
+        return jsonify({'error': 'Stock growth data is unavailable or invalid.'}), 400
+
+    # User inputs: principal investment and timeframe
+    principal = float(request.args.get('principal', 10000))  # Default to $10,000
+    months = int(request.args.get('months', 12))  # Default to 12 months
+
+    # Calculate the average growth rate
+    avg_growth_rate = calculate_average_growth(df)
+
+    # Project growth over the selected timeframe
+    projections = []
+    current_value = principal
+    for i in range(1, months + 1):
+        current_value *= (1 + avg_growth_rate)
+        projections.append({"month": f"Month {i}", "projected_value": round(current_value, 2)})
+
+    return jsonify(projections)
+
+
 if __name__ == '__main__':
     app.run(debug=True)

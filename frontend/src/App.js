@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FinanceChart from './FinanceChart';
 import StockGrowthChart from './StockGrowthChart';
+import ProjectionsChart from "./ProjectionsChart";
 
 function App() {
   const [finances, setFinances] = useState([]);
@@ -141,9 +142,13 @@ function App() {
   };
 
   const formatMonth = (dateString) => {
-    const date = new Date(dateString);
-    date.setMonth(date.getMonth() + 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const date = new Date(dateString); // Create date from the input string
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      timeZone: 'UTC', // Ensure it's in UTC
+    });
+    return formatter.format(date);
   };
 
   return (
@@ -261,7 +266,7 @@ function App() {
           <tbody>
             {finances.map((finance, index) => (
               <tr key={index}>
-                <td style={tdStyle}>{formatMonth(item.month)}</td>
+                <td style={tdStyle}>{formatMonth(finance.month)}</td>
                 <td style={tdStyle}>{finance.checking_balance}</td>
                 <td style={tdStyle}>{finance.stock_balance}</td>
                 <td style={tdStyle}>{finance.money_added}</td>
@@ -284,6 +289,11 @@ function App() {
         <h1 style={headingStyle}>Stock Growth Chart</h1>
         <StockGrowthChart />
       </div>
+
+      <div>
+        <h1 style={headingStyle}>Projections Chart</h1>
+        <ProjectionsChart />
+    </div>
     </div>
   );
 }
