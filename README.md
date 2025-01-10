@@ -22,7 +22,7 @@ A personal finance tracking web app built with PostgreSQL, Flask, and React. Pap
 
 ## Technologies
 
-- **Frontend**: React
+- **Frontend**: React, Chart.js
 - **Backend**: Flask
 - **Database**: PostgreSQL
 - **Version Control**: Git and GitHub
@@ -55,10 +55,9 @@ To run this project locally, follow the steps below:
      pip install -r requirements.txt
      ```
 
-   - Set up the PostgreSQL database and configure environment variables in .env:
+   - Set up the PostgreSQL database and configure environment variables:
 
      ```bash
-     touch .env
      DB_NAME=your_database_name
      DB_USER=your_database_user
      DB_PASSWORD=your_database_password
@@ -112,25 +111,52 @@ To run this project locally, follow the steps below:
 
 ## Endpoints
 
-- **GET /api/finances**: Retrieves all finance records.
-- **POST /api/finances**: Adds a new finance record.
+Here are the available API endpoints in the backend:
 
-### Example Request (POST):
+### **GET /api/finances**
+Retrieves all finance records from the database.
+
+### **POST /api/finances**
+If month entered has an existing record, the record is updated. Otherwise, a new record is created. The request body should contain the following fields:
 
 ```json
 {
-  "month": "January",
-  "checking_balance": 1500.50,
-  "stock_balance": 2500.75,
-  "income": 3000.00,
-  "credit_bill": 200.00,
-  "other_expenses": 400.00
+  "month": "2025-01",  // Year and month in YYYY-MM format (stored as 2025-01-01 in the database)
+  "checking_balance": 1500.50,  // Checking account balance
+  "stock_balance": 2500.75,  // Stock account balance
+  "income": 3000.00,  // Income for the month
+  "credit_bill": 200.00,  // Credit bill amount
+  "other_expenses": 400.00,  // Other expenses for the month
+  "money_added": 500.00  // Amount added to the stock account
 }
+
 ```
 
+### **GET /api/chart**
+Generates a chart of checking balance over time, returning an image in PNG format.
+
+### **GET /api/projected_growth**
+Provides projections for stock growth over a specified timeframe. Query parameters include:
+
+- **principal**: The initial investment (default is 10,000).
+- **months**: The number of months for projection (default is 12).
+
+Example Request:
+
+```bash
+GET /api/projected_growth?principal=10000&months=12
+```
+
+## Error Handling
+- Invalid data or missing fields will result in an error message and HTTP status code 400.
+- Database or internal server errors are handled with an appropriate error message and HTTP status code 500.
+
 ## Screenshots
-<img src="screenshots/add-record.png" alt="Alt Text" width="500">
-<img src="screenshots/net-worth.png" alt="Alt Text" width="350">
+Here are some screenshots of the application:
+
+<img src="screenshots/add-record.png" alt="Screenshot showing how to add a new finance record" width="600">
+<img src="screenshots/net-worth.png" alt="Screenshot showing net worth overview" width="500">
+
 
 ## Contact
 

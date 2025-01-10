@@ -32,13 +32,14 @@ def get_finance_data(): # for the line chart
     query = 'SELECT * FROM finances;'  # Adjust your query based on your actual schema
     df = pd.read_sql(query, conn)
     conn.close()
+    # return jsonify({"data": "some data"})
     return df
 
 @app.route('/api/finances', methods=['GET'])
 def get_records():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM finances;')
+    cur.execute('SELECT * FROM finances ORDER BY month ASC;')
     finances = cur.fetchall()
     cur.close()
     conn.close()
@@ -54,51 +55,70 @@ def get_records():
 
 @app.route('/api/finances', methods=['POST'])
 def create_record():
-    data = request.get_json()  # Get the JSON data sent in the request body
+    try:
+        data = request.get_json()  # Get the JSON data sent in the request body
 
-    month = data.get('month')
-    checking_balance = data.get('checking_balance')
-    stock_balance = data.get('stock_balance')
-    income = data.get('income')
-    credit_bill = data.get('credit_bill')
-    other_expenses = data.get('other_expenses')
-    money_added = data.get('money_added')
-    stock_growth = data.get('stock_growth')
-    net_worth = checking_balance + stock_balance # Sets net worth
+        # Ensure all required fields are present
+        required_fields = ['month', 'checking_balance', 'stock_balance', 'income', 'credit_bill', 'other_expenses', 'money_added']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
 
-    conn = get_db_connection()
-    cur = conn.cursor()
 
-    # Check if the record for the given month already exists
-    cur.execute('SELECT * FROM finances WHERE month = %s', (month,))
-    existing_record = cur.fetchone()
+        data = request.get_json()  # Get the JSON data sent in the request body
+        month = data.get('month')  # This will be in the format 'YYYY-MM'
+        
+        # Ensure the month is a valid date (e.g., '2025-02' becomes '2025-02-01')
+        if month:
+            month = f"{month}-01"  # Adding '-01' to treat it as the first day of the month
+        
+        checking_balance = data['checking_balance']
+        stock_balance = data['stock_balance']
+        income = data['income']
+        credit_bill = data['credit_bill']
+        other_expenses = data['other_expenses']
+        money_added = data['money_added']
+        stock_growth = data.get('stock_growth')
+        net_worth = float(checking_balance) + float(stock_balance)  # Calculates net worth
 
-    if existing_record:
-        # Update the existing record
-        cur.execute('''
-            UPDATE finances
-            SET checking_balance = %s,
-                stock_balance = %s,
-                income = %s,
-                credit_bill = %s,
-                other_expenses = %s,
-                net_worth = %s,
-                money_added = %s,
-                stock_growth = %s
-            WHERE month = %s
-        ''', (checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, stock_growth, month))
-    else:
-        # Insert a new record
-        cur.execute('''
-            INSERT INTO finances (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, stock_growth)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, stock_growth))
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        # Check if the record for the given month already exists
+        cur.execute('SELECT * FROM finances WHERE month = %s', (month,))
+        existing_record = cur.fetchone()
 
-    return jsonify({'message': 'Finance record created or updated successfully!'}), 201
+        if existing_record:
+            # Update the existing record
+            cur.execute('''
+                UPDATE finances
+                SET checking_balance = %s,
+                    stock_balance = %s,
+                    income = %s,
+                    credit_bill = %s,
+                    other_expenses = %s,
+                    net_worth = %s,
+                    money_added = %s,
+                WHERE month = %s
+            ''', (checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added, month))
+        else:
+            # Insert a new record
+            cur.execute('''
+                INSERT INTO finances (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ''', (month, checking_balance, stock_balance, income, credit_bill, other_expenses, net_worth, money_added))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({'message': 'Finance record created or updated successfully!'}), 201
+
+    except Exception as e:
+        # Log the error and return a helpful message
+        print(f"Error: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
 
 @app.route('/api/chart', methods=['GET'])
 def generate_chart():
@@ -158,6 +178,40 @@ def projected_growth():
         projections.append({"month": f"Month {i}", "projected_value": round(current_value, 2)})
 
     return jsonify(projections)
+
+
+# Add this new route to your Flask backend:
+
+# In your Flask backend, ensure your delete route looks exactly like this:
+
+@app.route('/api/finances/<int:id>', methods=['DELETE'])
+def delete_record(id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        # Check if record exists
+        cur.execute('SELECT * FROM finances WHERE id = %s', (id,))
+        record = cur.fetchone()
+        
+        if record is None:
+            cur.close()
+            conn.close()
+            return jsonify({'error': 'Record not found'}), 404
+            
+        # Delete the record
+        cur.execute('DELETE FROM finances WHERE id = %s', (id,))
+        conn.commit()
+        
+        cur.close()
+        conn.close()
+        return jsonify({'message': 'Record deleted successfully'}), 200
+        
+    except Exception as e:
+        print(f"Error deleting record: {str(e)}")  # Add this for debugging
+        cur.close()
+        conn.close()
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

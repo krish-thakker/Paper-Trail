@@ -3,6 +3,7 @@ import FinanceChart from './FinanceChart';
 import StockGrowthChart from './StockGrowthChart';
 import ProjectionsChart from "./ProjectionsChart";
 
+
 function App() {
   const [finances, setFinances] = useState([]);
   const [month, setMonth] = useState('');
@@ -11,7 +12,6 @@ function App() {
   const [income, setIncome] = useState('');
   const [creditBill, setCreditBill] = useState('');
   const [otherExpenses, setOtherExpenses] = useState('');
-  const [netWorth, setNetWorth] = useState('');
   const [moneyAdded, setMoneyAdded] = useState('');
 
   useEffect(() => {
@@ -29,7 +29,6 @@ function App() {
       income: income,
       credit_bill: creditBill,
       other_expenses: otherExpenses,
-      net_worth: netWorth,
       money_added: moneyAdded
     };
 
@@ -54,7 +53,6 @@ function App() {
         setIncome('');
         setCreditBill('');
         setOtherExpenses('');
-        setNetWorth('');
         setMoneyAdded('');
       });
   };
@@ -151,6 +149,34 @@ function App() {
     return formatter.format(date);
   };
 
+// In your React component, update the handleDelete function:
+
+const handleDelete = async (id) => {
+  if (window.confirm('Are you sure you want to delete this record?')) {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/api/finances/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete record');
+      }
+
+      setFinances(prevFinances => 
+        prevFinances.filter(finance => finance.id !== id)
+      );
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      alert(error.message);
+    }
+  }
+};
+
   return (
     <div style={containerStyle}>
       <h2 style={headingStyle}>Add a New Finance Record</h2>
@@ -232,17 +258,6 @@ function App() {
               style={inputStyle}
             />
           </div>
-
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Net Worth:</label>
-            <input
-              type="number"
-              value={netWorth}
-              onChange={(e) => setNetWorth(e.target.value)}
-              required
-              style={inputStyle}
-            />
-          </div>
         </div>
 
         <button type="submit" style={buttonStyle}>Add Record</button>
@@ -261,6 +276,7 @@ function App() {
               <th style={thStyle}>Credit Bill</th>
               <th style={thStyle}>Other Expenses</th>
               <th style={thStyle}>Net Worth</th>
+              <th style={thStyle}>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -274,6 +290,22 @@ function App() {
                 <td style={tdStyle}>{finance.credit_bill}</td>
                 <td style={tdStyle}>{finance.other_expenses}</td>
                 <td style={tdStyle}>{finance.net_worth}</td>
+                <td style={tdStyle}>
+                <button
+                  onClick={() => handleDelete(finance.id)}
+                  style={{
+                    backgroundColor: 'transparent',
+                    padding: '0', // Remove padding to make it compact around the icon
+                    border: 'none', // Remove the border for a cleaner look
+                    cursor: 'pointer', // Standard clickable cursor
+                    display: 'flex', // Use flexbox to center the icon
+                    justifyContent: 'center', // Center the icon horizontally
+                    alignItems: 'center', // Center the icon vertically
+                  }}
+                >
+                  <img src="/trash.png" alt="Delete" style={{ width: '24px', height: '24px' }} />
+                </button>
+              </td>
               </tr>
             ))}
           </tbody>
