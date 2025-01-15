@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import FinanceChart from './FinanceChart';
 import StockGrowthChart from './StockGrowthChart';
 import ProjectionsChart from "./ProjectionsChart";
-
+import Analysis from "./Analysis";
 
 function App() {
   const [finances, setFinances] = useState([]);
@@ -325,7 +325,12 @@ const handleDelete = async (id) => {
       <div>
         <h1 style={headingStyle}>Projections Chart</h1>
         <ProjectionsChart />
-    </div>
+      </div>
+
+      <div>
+        <Analysis />
+      </div>
+
     </div>
   );
 }

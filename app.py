@@ -6,6 +6,9 @@ from flask_cors import CORS
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
+import openai
+import requests
+import math
 
 # Load environment variables from .env file
 load_dotenv()
@@ -212,6 +215,134 @@ def delete_record(id):
         cur.close()
         conn.close()
         return jsonify({'error': str(e)}), 500
+    
+
+# @app.route('/api/chat', methods=['POST'])
+# def chat_with_bot():
+#     try:
+#         data = request.get_json()  # Get the JSON data sent in the request body
+#         user_message = data.get('message')  # Extract the 'message' key
+
+#         if not user_message:
+#             return jsonify({'error': 'No user input provided.'}), 400
+
+#         # Make the API call to OpenAI's Chat API
+#         response = requests.post(
+#             'https://api.openai.com/v1/chat/completions',
+#             json={
+#                 'model': 'gpt-3.5-turbo',
+#                 'messages': [{'role': 'user', 'content': user_message}],
+#                 'max_tokens': 100,
+#                 'temperature': 0.7,
+#             },
+#             headers={
+#                 'Authorization': f'Bearer {openai.api_key}',
+#                 'Content-Type': 'application/json',
+#             }
+#         )
+
+#         # Check if the response is valid
+#         if response.status_code != 200:
+#             return jsonify({'error': 'Error from OpenAI API'}), 500
+
+#         # Parse the AI response and send it back
+#         ai_response = response.json()
+#         bot_message = ai_response['choices'][0]['message']['content'].strip()
+
+#         return jsonify({'message': bot_message})
+
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
+def analyze_financial_data(df):
+    # Analysis of Trends in Balances, Income, Expenses, and Net Worth
+    trends = {
+        "checking_balance_trend": df['checking_balance'].pct_change().mean(),
+        "stock_balance_trend": df['stock_balance'].pct_change().mean(),
+        "income_trend": df['income'].pct_change().mean(),
+        "expenses_trend": (df['credit_bill'] + df['other_expenses']).pct_change().mean(),
+        "net_worth_trend": df['net_worth'].pct_change().mean()
+    }
+    
+    # Correlations
+    correlations = {
+        "income_vs_net_worth": df['income'].corr(df['net_worth']),
+        "income_vs_stock_balance": df['income'].corr(df['stock_balance']),
+        "money_added_vs_net_worth": df['money_added'].corr(df['net_worth']),
+    }
+    
+    # Financial Health
+    checking_balance = df['checking_balance'].iloc[-1]
+    credit_bill = df['credit_bill'].iloc[-1]
+    other_expenses = df['other_expenses'].iloc[-1]
+    income = df['income'].iloc[-1]
+    
+    # To avoid division by zero errors:
+    expenses_total = credit_bill + other_expenses
+    checking_balance_to_expenses_ratio = checking_balance / expenses_total if expenses_total != 0 else None
+    income_vs_expenses_ratio = income / expenses_total if expenses_total != 0 else None
+    
+    financial_health = {
+        "checking_balance_to_expenses_ratio": checking_balance_to_expenses_ratio,
+        "income_vs_expenses_ratio": income_vs_expenses_ratio,
+    }
+    
+    # Recommendations for improving financial health
+    recommendations = []
+    if financial_health["checking_balance_to_expenses_ratio"] and financial_health["checking_balance_to_expenses_ratio"] < 1.5:
+        recommendations.append("Consider increasing your checking balance to ensure better coverage of monthly expenses.")
+    
+    if trends["stock_balance_trend"] < 0:
+        recommendations.append("Your stock balance is not growing consistently. Consider reviewing your investment strategy or increasing contributions.")
+    
+    if financial_health["income_vs_expenses_ratio"] and financial_health["income_vs_expenses_ratio"] < 1.5:
+        recommendations.append("Your income is not enough to cover your monthly expenses comfortably. Consider finding ways to reduce expenses or increase income.")
+    
+    # Summarize Key Patterns or Concerns
+    key_concerns = []
+    if trends["net_worth_trend"] < 0:
+        key_concerns.append("Your net worth has been declining. Focus on increasing income and reducing expenses to improve your financial position.")
+    
+    if correlations["income_vs_stock_balance"] < 0.5:
+        key_concerns.append("Income and stock investments are not well correlated. Try to increase the proportion of income directed to investments.")
+    
+    # Replace NaN or Infinity with None or a more appropriate value
+    def sanitize(value):
+        if isinstance(value, (int, float)):
+            if math.isnan(value) or value == float('inf') or value == float('-inf'):
+                return None
+        return value
+
+    # Apply sanitize function to all results
+    trends = {key: sanitize(value) for key, value in trends.items()}
+    correlations = {key: sanitize(value) for key, value in correlations.items()}
+    financial_health = {key: sanitize(value) for key, value in financial_health.items()}
+    
+    return {
+        "trends": trends,
+        "correlations": correlations,
+        "financial_health": financial_health,
+        "recommendations": recommendations,
+        "key_concerns": key_concerns
+    }
+
+@app.route('/api/analyze_finances', methods=['GET'])
+def analyze_finances():
+    try:
+        # Get the finance data
+        df = get_finance_data()
+
+        # Ensure the 'net_worth' column exists
+        if 'net_worth' not in df.columns:
+            return jsonify({'error': 'Net worth data is unavailable.'}), 400
+
+        # Perform the analysis
+        analysis_result = analyze_financial_data(df)
+
+        return jsonify(analysis_result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 if __name__ == '__main__':
